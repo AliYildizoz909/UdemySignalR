@@ -22,7 +22,7 @@
         //Recevie metodumuzu burada tanımlıyoruz. Server bu metoda parametre göndererek çalıştırıyor.
         connection.on("ReceiveName",
             (name) => {
-                console.log(name);
+                $("#nameList").append('<li class="list-group-item">'+name+'</li>')
             });
 
     </script>
@@ -35,5 +35,8 @@
         <div class="alert alert-info">
             Bağlantı durumu:<strong id="conStatus"></strong>
         </div>
+    </div>
+    <div class="col-md-8 offset-2" >
+        <ul id="nameList" class="list-group"></ul>
     </div>
 </div>
