@@ -7,6 +7,8 @@
 
     <script type="text/javascript">
         $("#alertNotify").hide();
+        $("#alertError").hide();
+
         //Bağlantımızı oluşturuyoruz
         //configureLogging ile adım adım logları konsola yazıyoruz
         //withAutomaticReconnect ile 0 2 5 10 30 her birinde o kadar saniye bekleyerek yeniden bağlanmaya çalışır bağlanamaz ise sonraki sayı saniye kadar bekler ve yine istek yapar. Yani ilk bağlantı kotuğunda direk bağlanmaya çalışır bağlanamaz ise 2 saniye bekler yeniden dener yine olmaz ise 5 saniye ve 10 saniye ... böyle devam eder 30 saniyeye kadar, en sonunda fail verir ve denemeyi bırakır. Bu saniyeler defaulttur istersek kendimizde bu saniyeleri verebiliriz.
@@ -19,6 +21,7 @@
             connection.start().then(() => {
                 $("#loading").hide();
                 statusShow();
+                connection.invoke("GetNames").catch((err) => console.log(err));;
             }).catch((err) => {
                 $("#loading").show();
                 console.log(err);
@@ -56,7 +59,7 @@
         $("#btnNameSave ").click(() => {
             connection.invoke("SendName", $("#txtName").val()).catch((err) => console.log(err));
         });
-
+       
         //Eğer mesajımız gitmiş ise Serverımızda tanımladığımız SendAsync metodu çalışarak bu metotta tanımlanan ReceiveName metoduna yukarıda gönderdiğimiz name i göndererek çalıştırır. Bunun sonucunda aşağıdaki metot çalışarak gönderilen name listelenir.
         connection.on("ReceiveName",
             (name) => {
@@ -71,6 +74,17 @@
                 $("#notify").text(message);
                 $("#alertNotify").show();
             });
+        connection.on("Error",
+            (message) => {
+                $("#error").text(message);
+                $("#alertError").show();
+            });
+        connection.on("ReceiveNames",
+            (names) => {
+                for (var i = 0; i < names.length; i++) {
+                    $("#nameList").append('<li class="list-group-item">' + names[i] + '</li>')
+                }
+            });
     </script>
 }
 <div class="row">
@@ -80,8 +94,11 @@
         <hr />
         <button class="btn btn-light" id="btnNameSave">İsim kaydet</button>
         <hr /> 
-        <div class="alert alert-danger" id="alertNotify">
+        <div class="alert alert-success" id="alertNotify">
             <strong id="notify"></strong>
+        </div>
+        <div class="alert alert-danger" id="alertError">
+            <strong id="error"></strong>
         </div>
         <div class="alert alert-info">
             <div class="float-left">  Bağlantı durumu:<strong id="conStatus"></strong></div>
