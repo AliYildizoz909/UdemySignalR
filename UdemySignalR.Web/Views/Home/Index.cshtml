@@ -12,31 +12,35 @@
         //withAutomaticReconnect ile 0 2 5 10 30 her birinde o kadar saniye bekleyerek yeniden bağlanmaya çalışır bağlanamaz ise sonraki sayı saniye kadar bekler ve yine istek yapar. Yani ilk bağlantı kotuğunda direk bağlanmaya çalışır bağlanamaz ise 2 saniye bekler yeniden dener yine olmaz ise 5 saniye ve 10 saniye ... böyle devam eder 30 saniyeye kadar, en sonunda fail verir ve denemeyi bırakır. Bu saniyeler defaulttur istersek kendimizde bu saniyeleri verebiliriz.
         var connection = new signalR.HubConnectionBuilder().configureLogging(signalR.LogLevel.Debug).withAutomaticReconnect([1000, 1000, 3000, 3000]).withUrl("https://localhost:5001/MyHub").build();
 
+        function statusShow() {
+            $("#conStatus").text(connection.connectionState);
+        }
+
         //Tekrar bağlanmaya çalıştığında çalışan metot
         connection.onreconnecting(err => {
             $("#loading").show();
-            $("#conStatus").text(connection.connectionState);
+            statusShow();
             console.log("onreconnection:", err);
         });
 
         //Bağlandığında çalışan metot
         connection.onreconnected(connectionId => {
             $("#loading").hide();
-            $("#conStatus").text(connection.connectionState);
+            statusShow();
             console.log("connectionId:", connectionId);
         });
 
         connection.onclose(() => {
-            $("#conStatus").text(connection.connectionState);
+            statusShow();
         });
 
         //Bağlantı durumunu gösteriyoruz
-        $("#conStatus").text(connection.connectionState);
+        statusShow();
 
         //Bağlantımızı başlatıp durumu gösteriyoruz
         connection.start().then(() => {
             $("#loading").hide();
-            $("#conStatus").text(connection.connectionState);
+            statusShow();
         }).catch((err) => console.log(err));
 
         //Butona tıklandığında Serverdaki SendName adındaki metoda text inputunda olan texti gönderiyoruz
