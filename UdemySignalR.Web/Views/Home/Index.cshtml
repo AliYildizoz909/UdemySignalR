@@ -6,7 +6,7 @@
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
 
     <script type="text/javascript">
-      
+        $("#alertNotify").hide();
         //Bağlantımızı oluşturuyoruz
         //configureLogging ile adım adım logları konsola yazıyoruz
         //withAutomaticReconnect ile 0 2 5 10 30 her birinde o kadar saniye bekleyerek yeniden bağlanmaya çalışır bağlanamaz ise sonraki sayı saniye kadar bekler ve yine istek yapar. Yani ilk bağlantı kotuğunda direk bağlanmaya çalışır bağlanamaz ise 2 saniye bekler yeniden dener yine olmaz ise 5 saniye ve 10 saniye ... böyle devam eder 30 saniyeye kadar, en sonunda fail verir ve denemeyi bırakır. Bu saniyeler defaulttur istersek kendimizde bu saniyeleri verebiliriz.
@@ -15,7 +15,17 @@
         function statusShow() {
             $("#conStatus").text(connection.connectionState);
         }
-
+        function start() {
+            connection.start().then(() => {
+                $("#loading").hide();
+                statusShow();
+            }).catch((err) => {
+                $("#loading").show();
+                console.log(err);
+                //Hata olursa iki saniye sonra tekrar başlanacak
+                setTimeout(() => start(), 2000);
+            });
+        }
         //Tekrar bağlanmaya çalıştığında çalışan metot
         connection.onreconnecting(err => {
             $("#loading").show();
@@ -23,7 +33,7 @@
             console.log("onreconnection:", err);
         });
 
-        //Bağlandığında çalışan metot
+        //Bağlantı kopup tekrar bağlandığında çalışan metot
         connection.onreconnected(connectionId => {
             $("#loading").hide();
             statusShow();
@@ -31,17 +41,16 @@
         });
 
         connection.onclose(() => {
+            $("#loading").hide();
             statusShow();
+            start();
         });
 
         //Bağlantı durumunu gösteriyoruz
         statusShow();
 
         //Bağlantımızı başlatıp durumu gösteriyoruz
-        connection.start().then(() => {
-            $("#loading").hide();
-            statusShow();
-        }).catch((err) => console.log(err));
+        start();
 
         //Butona tıklandığında Serverdaki SendName adındaki metoda text inputunda olan texti gönderiyoruz
         $("#btnNameSave ").click(() => {
@@ -53,15 +62,27 @@
             (name) => {
                 $("#nameList").append('<li class="list-group-item">' + name + '</li>')
             });
-
-
+        connection.on("ReceiveClientCount",
+            (clientCount) => {
+                $("#clientCount").text(clientCount);
+            });
+        connection.on("Notify",
+            (message) => {
+                $("#notify").text(message);
+                $("#alertNotify").show();
+            });
     </script>
 }
 <div class="row">
     <div class="col-md-8 offset-2">
         <input class="form-control" type="text" id="txtName" />
+        <h6>Bağlı kullanıcı: <strong id="clientCount"></strong></h6>
         <hr />
         <button class="btn btn-light" id="btnNameSave">İsim kaydet</button>
+        <hr /> 
+        <div class="alert alert-danger" id="alertNotify">
+            <strong id="notify"></strong>
+        </div>
         <div class="alert alert-info">
             <div class="float-left">  Bağlantı durumu:<strong id="conStatus"></strong></div>
             <div class="float-right">

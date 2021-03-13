@@ -9,7 +9,8 @@ namespace UdemySignalR.API.Hubs
     public class MyHub : Hub
     {
         //Client her istek yaptığında bu sınıf tekrar oluşacağından static tanımlanmayan tüm veriler sıfırlanacaktır.
-        public static List<string> Names { get; set; } = new List<string>();
+        private static List<string> Names { get; set; } = new List<string>();
+        private static int ClientCount { get; set; } = 0;
 
         //Tüm metotlar public ve async olmalıdır
         public async Task SendName(string name)
@@ -22,6 +23,20 @@ namespace UdemySignalR.API.Hubs
         public async Task GetNames()
         {
             await Clients.All.SendAsync("ReceiveNames", Names);
+        }
+        //Client bağlandığında çalışan method
+        public async override  Task OnConnectedAsync()
+        {
+            ClientCount++;
+            await Clients.All.SendAsync("ReceiveClientCount", ClientCount);
+            await base.OnConnectedAsync();
+        }
+        //Client bağlantıdan çıktığında çalışan method
+        public async override Task OnDisconnectedAsync(Exception exception)
+        {
+            ClientCount--;
+            await Clients.All.SendAsync("ReceiveClientCount", ClientCount);
+            await base.OnConnectedAsync();
         }
     }
 }
