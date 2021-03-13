@@ -1,0 +1,44 @@
+﻿
+@{
+    ViewData["Title"] = "Index2";
+}
+
+@section Scripts
+{
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+
+    <script type="text/javascript">
+        //Myhubımız mvc içi,nde olduğu için url vermemize gerek yok. Sadece pathi versek yeterli.
+        var connection = new signalR.HubConnectionBuilder().configureLogging(signalR.LogLevel.Debug).withUrl("/MyHub").build();
+        
+        $("#conStatus").text(connection.connectionState);
+       
+        connection.start().then(() => {
+            $("#conStatus").text(connection.connectionState);
+        }).catch((err) => console.log(err));
+        
+        $("#btnNameSave ").click(() => {
+            connection.invoke("SendMessage", $("#txtName").val()).catch((err) => console.log(err));
+        });
+        
+        connection.on("ReceiveMessage",
+            (name) => {
+                $("#nameList").append('<li class="list-group-item">'+name+'</li>')
+            });
+
+    </script>
+}
+<div class="row">
+    <div class="col-md-8 offset-2">
+        <input class="form-control" type="text" id="txtName" />
+        <hr />
+        <button class="btn btn-light" id="btnNameSave">İsim kaydet</button>
+        <div class="alert alert-info">
+            Bağlantı durumu:<strong id="conStatus"></strong>
+        </div>
+    </div>
+    <div class="col-md-8 offset-2">
+        <ul id="nameList" class="list-group"></ul>
+    </div>
+</div>
+

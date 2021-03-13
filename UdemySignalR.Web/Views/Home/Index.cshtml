@@ -6,13 +6,36 @@
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
 
     <script type="text/javascript">
+      
         //Bağlantımızı oluşturuyoruz
         //configureLogging ile adım adım logları konsola yazıyoruz
-        var connection = new signalR.HubConnectionBuilder().configureLogging(signalR.LogLevel.Debug).withUrl("https://localhost:44339/MyHub").build();
+        //withAutomaticReconnect ile 0 2 5 10 30 her birinde o kadar saniye bekleyerek yeniden bağlanmaya çalışır bağlanamaz ise sonraki sayı saniye kadar bekler ve yine istek yapar. Yani ilk bağlantı kotuğunda direk bağlanmaya çalışır bağlanamaz ise 2 saniye bekler yeniden dener yine olmaz ise 5 saniye ve 10 saniye ... böyle devam eder 30 saniyeye kadar, en sonunda fail verir ve denemeyi bırakır. Bu saniyeler defaulttur istersek kendimizde bu saniyeleri verebiliriz.
+        var connection = new signalR.HubConnectionBuilder().configureLogging(signalR.LogLevel.Debug).withAutomaticReconnect([1000, 1000, 3000, 3000]).withUrl("https://localhost:5001/MyHub").build();
+
+        //Tekrar bağlanmaya çalıştığında çalışan metot
+        connection.onreconnecting(err => {
+            $("#loading").show();
+            $("#conStatus").text(connection.connectionState);
+            console.log("onreconnection:", err);
+        });
+
+        //Bağlandığında çalışan metot
+        connection.onreconnected(connectionId => {
+            $("#loading").hide();
+            $("#conStatus").text(connection.connectionState);
+            console.log("connectionId:", connectionId);
+        });
+
+        connection.onclose(() => {
+            $("#conStatus").text(connection.connectionState);
+        });
+
         //Bağlantı durumunu gösteriyoruz
         $("#conStatus").text(connection.connectionState);
+
         //Bağlantımızı başlatıp durumu gösteriyoruz
         connection.start().then(() => {
+            $("#loading").hide();
             $("#conStatus").text(connection.connectionState);
         }).catch((err) => console.log(err));
 
@@ -24,8 +47,9 @@
         //Eğer mesajımız gitmiş ise Serverımızda tanımladığımız SendAsync metodu çalışarak bu metotta tanımlanan ReceiveName metoduna yukarıda gönderdiğimiz name i göndererek çalıştırır. Bunun sonucunda aşağıdaki metot çalışarak gönderilen name listelenir.
         connection.on("ReceiveName",
             (name) => {
-                $("#nameList").append('<li class="list-group-item">'+name+'</li>')
+                $("#nameList").append('<li class="list-group-item">' + name + '</li>')
             });
+
 
     </script>
 }
@@ -35,10 +59,16 @@
         <hr />
         <button class="btn btn-light" id="btnNameSave">İsim kaydet</button>
         <div class="alert alert-info">
-            Bağlantı durumu:<strong id="conStatus"></strong>
+            <div class="float-left">  Bağlantı durumu:<strong id="conStatus"></strong></div>
+            <div class="float-right">
+                <div class="spinner-border" role="status" id="loading">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+            <div class="clearfix"></div>
         </div>
     </div>
-    <div class="col-md-8 offset-2" >
+    <div class="col-md-8 offset-2">
         <ul id="nameList" class="list-group"></ul>
     </div>
 </div>
