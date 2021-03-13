@@ -6,20 +6,22 @@
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
 
     <script type="text/javascript">
-
-        var connection = new signalR.HubConnectionBuilder().withUrl("https://localhost:44339/MyHub").build();
-
+        //Bağlantımızı oluşturuyoruz
+        //configureLogging ile adım adım logları konsola yazıyoruz
+        var connection = new signalR.HubConnectionBuilder().configureLogging(signalR.LogLevel.Debug).withUrl("https://localhost:44339/MyHub").build();
+        //Bağlantı durumunu gösteriyoruz
         $("#conStatus").text(connection.connectionState);
-
+        //Bağlantımızı başlatıp durumu gösteriyoruz
         connection.start().then(() => {
             $("#conStatus").text(connection.connectionState);
         }).catch((err) => console.log(err));
 
+        //Butona tıklandığında Serverdaki SendName adındaki metoda text inputunda olan texti gönderiyoruz
         $("#btnNameSave ").click(() => {
             connection.invoke("SendName", $("#txtName").val()).catch((err) => console.log(err));
         });
 
-        //Recevie metodumuzu burada tanımlıyoruz. Server bu metoda parametre göndererek çalıştırıyor.
+        //Eğer mesajımız gitmiş ise Serverımızda tanımladığımız SendAsync metodu çalışarak bu metotta tanımlanan ReceiveName metoduna yukarıda gönderdiğimiz name i göndererek çalıştırır. Bunun sonucunda aşağıdaki metot çalışarak gönderilen name listelenir.
         connection.on("ReceiveName",
             (name) => {
                 $("#nameList").append('<li class="list-group-item">'+name+'</li>')
