@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.31025.194
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UdemySignalR.API", "UdemySignalR.API\UdemySignalR.API.csproj", "{DBFB4369-CBBA-491C-89A7-05C4E67AB82E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UdemySignalR.Web", "UdemySignalR.Web\UdemySignalR.Web.csproj", "{B74DB2B2-DFD3-4C65-AE41-6C32DD97E3A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UdemySignalR.Web", "UdemySignalR.Web\UdemySignalR.Web.csproj", "{B74DB2B2-DFD3-4C65-AE41-6C32DD97E3A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CovidChart.API", "CovidChart.API\CovidChart.API.csproj", "{9AA28659-2388-4F39-BBF6-01B9746AABC6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{B74DB2B2-DFD3-4C65-AE41-6C32DD97E3A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B74DB2B2-DFD3-4C65-AE41-6C32DD97E3A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B74DB2B2-DFD3-4C65-AE41-6C32DD97E3A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AA28659-2388-4F39-BBF6-01B9746AABC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AA28659-2388-4F39-BBF6-01B9746AABC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AA28659-2388-4F39-BBF6-01B9746AABC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AA28659-2388-4F39-BBF6-01B9746AABC6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
