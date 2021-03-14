@@ -3,11 +3,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using UdemySignalR.API.Models;
 
 namespace UdemySignalR.API.Hubs
 {
     public class MyHub : Hub
     {
+        private AppDbContext _dbContext;
+
+        public MyHub(AppDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
         //Client her istek yaptığında bu sınıf tekrar oluşacağından static tanımlanmayan tüm veriler sıfırlanacaktır.
         private static List<string> Names { get; set; } = new List<string>();
         private static int ClientCount { get; set; } = 0;
@@ -46,6 +55,40 @@ namespace UdemySignalR.API.Hubs
             ClientCount--;
             await Clients.All.SendAsync("ReceiveClientCount", ClientCount);
             await base.OnConnectedAsync();
+        }
+
+
+        public async Task SendNameByGroup(string name, string teamName)
+        {
+            var team = _dbContext.Teams.Where(x => x.Name == teamName).FirstOrDefault();
+
+            if (team != null)
+            {
+                team.Users.Add(new User{Name = name});
+            }
+            else
+            {
+                var newTeam = new Team {Name = teamName};
+                newTeam.Users.Add(new User{Name = name});
+                _dbContext.Teams.Add(newTeam);
+            }
+            await _dbContext.SaveChangesAsync();
+
+            await Clients.Group(teamName).SendAsync("ReceiveMessageByGroup",name,teamName);
+        }
+        public async Task GetNamesByGroup()
+        {
+            Clients.All.SendAsync("ReceiveNamesByGroup",
+                _dbContext.Teams.Include(team => team.Users)
+                    .Select(x => new {teamName = x.Name, users = x.Users.ToList()}));
+        }
+        public async Task AddToGroup(string teamName)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, teamName);
+        }
+        public async Task RemoveToGroup(string teamName)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, teamName);
         }
     }
 }
