@@ -17,11 +17,12 @@
         function statusShow() {
             $("#conStatus").text(connection.connectionState);
         }
+
         function start() {
             connection.start().then(() => {
                 $("#loading").hide();
                 statusShow();
-                connection.invoke("GetNames").catch((err) => console.log(err));;
+                connection.invoke("GetNamesByGroup").catch((err) => console.log(err));;
             }).catch((err) => {
                 $("#loading").show();
                 console.log(err);
@@ -29,6 +30,7 @@
                 setTimeout(() => start(), 2000);
             });
         }
+
         //Tekrar bağlanmaya çalıştığında çalışan metot
         connection.onreconnecting(err => {
             $("#loading").show();
@@ -59,7 +61,25 @@
         $("#btnNameSave ").click(() => {
             connection.invoke("SendName", $("#txtName").val()).catch((err) => console.log(err));
         });
-       
+        $("#btnNameTeam ").click(() => {
+            let name = $("#txtName").val();
+            let teamName = $("input[type=radio]:checked").val();
+            if ((name !== "" && name !== undefined) && (teamName !== "" && teamName !== undefined)) {
+                connection.invoke("SendNameByGroup", name, teamName).catch((err) => console.log(err));
+            }
+        });
+        $("input[type=radio]").change(() => {
+            let teamName = $("input[type=radio]:checked").val();
+            //console.log(teamName);
+            if (teamName=="Team A") {
+                connection.invoke("AddToGroup", teamName).catch((err) => console.log(err));
+                connection.invoke("RemoveToGroup", "Team B").catch((err) => console.log(err));
+            } else {
+                connection.invoke("AddToGroup", teamName).catch((err) => console.log(err));
+                connection.invoke("RemoveToGroup", "Team A").catch((err) => console.log(err));
+            }
+        });
+
         //Eğer mesajımız gitmiş ise Serverımızda tanımladığımız SendAsync metodu çalışarak bu metotta tanımlanan ReceiveName metoduna yukarıda gönderdiğimiz name i göndererek çalıştırır. Bunun sonucunda aşağıdaki metot çalışarak gönderilen name listelenir.
         connection.on("ReceiveName",
             (name) => {
@@ -85,6 +105,31 @@
                     $("#nameList").append('<li class="list-group-item">' + names[i] + '</li>')
                 }
             });
+        connection.on("ReceiveMessageByGroup",
+            (name, teamId) => {
+                console.log(name+" "+teamId);
+                let listName;
+                if (teamId == 1) {
+                    listName = "ATeamList";
+                } else {
+                    listName = "BTeamList";
+                }
+                $("#" + listName).append('<li class="list-group-item">' + name + '</li>');
+            });
+        connection.on("ReceiveNamesByGroup",
+            (teams) => {
+                for (var i = 0; i < teams.length; i++) {
+                    var listName;
+                    if (teams[i].teamName == "Team A") {
+                        listName = "ATeamList";
+                    } else {
+                        listName = "BTeamList";
+                    }
+                    for (var j = 0; j < teams[i].users.length; j++) {
+                        $("#" + listName).append('<li class="list-group-item">' + teams[i].users[j].name + '</li>');
+                    }
+                }
+            });
     </script>
 }
 <div class="row">
@@ -93,7 +138,8 @@
         <h6>Bağlı kullanıcı: <strong id="clientCount"></strong></h6>
         <hr />
         <button class="btn btn-light" id="btnNameSave">İsim kaydet</button>
-        <hr /> 
+        <button class="btn btn-warning" id="btnNameTeam">İsim kaydet(Takım)</button>
+        <hr />
         <div class="alert alert-success" id="alertNotify">
             <strong id="notify"></strong>
         </div>
@@ -110,7 +156,30 @@
             <div class="clearfix"></div>
         </div>
     </div>
+
+</div>
+<div class="row">
     <div class="col-md-8 offset-2">
-        <ul id="nameList" class="list-group"></ul>
+
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="TeamGroup" value="Team A" />
+            <label class="form-check-label">A Takımı</label>
+        </div>
+
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="TeamGroup" value="Team B" />
+            <label class="form-check-label">B Takımı</label>
+        </div>
+    </div>
+    <div class="col-md-8 offset-2">
+        <div class="row">
+            <div class="col-md-6">
+                <ul id="ATeamList" class="list-group"></ul>
+            </div>
+            <div class="col-md-6">
+                <ul id="BTeamList" class="list-group"></ul>
+            </div>
+        </div>
+       
     </div>
 </div>
