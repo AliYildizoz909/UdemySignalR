@@ -10,7 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using UdemySignalR.API.Hubs;
+using UdemySignalR.API.Models;
 
 namespace UdemySignalR.API
 {
@@ -28,11 +30,13 @@ namespace UdemySignalR.API
         {
             services.AddCors(options =>
             {
-                options.AddPolicy("CorsAll",builder => builder.WithOrigins("https://localhost:44348").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+                options.AddPolicy("CorsAll", builder => builder.WithOrigins("https://localhost:44348").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
             });
             services.AddControllers();
             //Kütüphaneyi kullandýðýmýzý bildiriyoruz.
             services.AddSignalR();
+
+            services.AddDbContext<AppDbContext>(builder => builder.UseSqlServer(Configuration["ConStr"].ToString()));
 
         }
 
@@ -50,7 +54,7 @@ namespace UdemySignalR.API
 
             app.UseCors("CorsAll");
             app.UseAuthorization();
-            
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
