@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CovidChart.API.Hubs;
 using CovidChart.API.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,9 +33,8 @@ namespace CovidChart.API
                 options.AddPolicy("CorsAll", builder => builder.WithOrigins("https://localhost:44348").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
             });
           
-            //Kütüphaneyi kullandýðýmýzý bildiriyoruz.
             services.AddSignalR();
-
+            services.AddScoped<CovidService>();
             services.AddDbContext<AppDbContext>(builder => builder.UseSqlServer(Configuration["ConStr"].ToString()));
             services.AddControllers();
         }
@@ -56,6 +56,7 @@ namespace CovidChart.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<CovidHub>("/CovidHub");
             });
         }
     }
