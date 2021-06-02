@@ -23,7 +23,7 @@ namespace CovidChart.API.Controllers
         public async Task<IActionResult> SaveCovid(Covid covid)
         {
             await _covidService.SaveCovid(covid);
-            return Ok(_covidService.GetList());
+            return Ok(_covidService.GetCovidChartList());
         }
 
         [HttpGet]

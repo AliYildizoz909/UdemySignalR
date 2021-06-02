@@ -50,7 +50,7 @@ namespace CovidChart.API
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            app.UseCors("CorsAll");
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
