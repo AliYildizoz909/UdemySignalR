@@ -78,7 +78,7 @@ namespace UdemySignalR.API.Hubs
         }
         public async Task GetNamesByGroup()
         {
-            Clients.Caller.SendAsync("ReceiveNamesByGroup",
+            await Clients.Caller.SendAsync("ReceiveNamesByGroup",
                 _dbContext.Teams.Include(team => team.Users)
                     .Select(x => new {teamName = x.Name, users = x.Users.ToList()}));
         }

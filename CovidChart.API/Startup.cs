@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CovidChart.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CovidChart.API
 {
@@ -25,6 +27,15 @@ namespace CovidChart.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsAll", builder => builder.WithOrigins("https://localhost:44348").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+            });
+          
+            //Kütüphaneyi kullandýðýmýzý bildiriyoruz.
+            services.AddSignalR();
+
+            services.AddDbContext<AppDbContext>(builder => builder.UseSqlServer(Configuration["ConStr"].ToString()));
             services.AddControllers();
         }
 
