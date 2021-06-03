@@ -30,7 +30,7 @@ namespace CovidChart.API
         {
             services.AddCors(options =>
             {
-                options.AddPolicy("CorsAll", builder => builder.WithOrigins("https://localhost:44348").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+                options.AddPolicy("CorsAll", builder => builder.WithOrigins("https://localhost:44348", "http://localhost:3000/", "https://localhost:3000/", "http://localhost:3000").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
             });
           
             services.AddSignalR();
